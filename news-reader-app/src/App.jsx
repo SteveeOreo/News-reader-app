@@ -1,14 +1,25 @@
-import { useState } from 'react'
-import './App.css'
+import { Routes, Route, Navigate } from "react-router-dom";
+import MainLayout from "./layouts/MainLayout";
+import HomePage from "./pages/HomePage";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import CategoryPage from "./pages/CategoryPage";
+import SearchResultsPage from "./pages/SearchResultsPage";
+import ArticleDetailsPage from "./pages/ArticleDetailsPage";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-        <h1 className="text-3xl bg-blue-700 font-bold underline">
-          Hello world!
-        </h1>
-      )
+    <MainLayout>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/category/:category" element={<CategoryPage />} />
+        <Route path="/search" element={<SearchResultsPage />} />
+        <Route path="/article/:id" element={<ArticleDetailsPage />} />
+        <Route path="/Navbar" element={<Navbar />} />
+        <Route path="/Footer" element={<Footer />} />
+        {/* redirect anything unknown back home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </MainLayout>
+  );
 }
-
-export default App
