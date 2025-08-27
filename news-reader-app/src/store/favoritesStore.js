@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export const useFavoritesStore = create((set) => ({
+export const useFavoritesStore = create((set, get) => ({
   favorites: JSON.parse(localStorage.getItem("favorites")) || [],
 
   addFavorite: (article) =>
@@ -17,6 +17,5 @@ export const useFavoritesStore = create((set) => ({
       return { favorites: updated };
     }),
 
-  isFavorite: (title) =>
-    JSON.parse(localStorage.getItem("favorites"))?.some((a) => a.title === title),
+  isFavorite: (title) => get().favorites.some((a) => a.title === title),
 }));
