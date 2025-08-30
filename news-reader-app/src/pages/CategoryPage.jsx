@@ -1,67 +1,43 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { fetchTopHeadlines } from "../services/newsAPI";
+import { useNewsStore } from "../store/newsStore";
+import NewsCard from "../components/NewsCard"; // Corrected import
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorMessage from "../components/ErrorMessage";
 
 export default function CategoryPage() {
   const { category } = useParams();
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { articles, loading, error, fetchArticles } = useNewsStore();
 
   useEffect(() => {
-    const getArticles = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchTopHeadlines(category);
-        setArticles(data);
-      } catch (error) {
-        console.error("Error fetching category articles:", error);
-        setArticles([]); // Clear articles on error
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchArticles(category);
+  }, [category, fetchArticles]);
 
-    getArticles();
-  }, [category]);
+  console.log("Number of articles in category:", articles.length);
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 capitalize">{category} News</h1>
-      {loading ? (
-        <p>Loading articles...</p>
-      ) : articles.length === 0 ? (
-        <p>No articles found for {category}.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {articles.map((article, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden"
-            >
-              {article.urlToImage && (
-                <img
-                  src={article.urlToImage}
-                  alt={article.title}
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-4">
-                <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
-                <p className="text-gray-600 text-sm mb-4">
-                  {article.description}
-                </p>
-                <a
-                  href={article.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline"
-                >
-                  Read more
-                </a>
-              </div>
-            </div>
+    <div className="p-4 md:p-6">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 capitalize">
+        {category} News
+      </h1>
+
+      {loading && <LoadingSpinner />}
+
+      {error && <ErrorMessage message={error} />}
+
+      {!loading && !error && articles.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* Using the correct NewsCard component */}
+          {articles.map((article) => (
+            <NewsCard key={article.uuid} article={article} />
           ))}
         </div>
+      )}
+
+      {!loading && !error && articles.length === 0 && (
+        <p className="text-center text-gray-500">
+          No articles found for {category}.
+        </p>
       )}
     </div>
   );

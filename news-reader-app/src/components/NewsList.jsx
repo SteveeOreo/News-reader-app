@@ -1,4 +1,3 @@
-// src/components/NewsList.jsx
 import NewsCard from "./NewsCard";
 
 export default function NewsList({ articles }) {

@@ -1,12 +1,11 @@
-// src/components/Navbar.jsx
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const categories = [
-  "Technology",
+  "Tech",
   "Sports",
-  "USA",
-  "AFRICA",
+  "Entertainment",
+  "Science",
   "Health",
   "Business",
 ];
@@ -14,8 +13,16 @@ const categories = [
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile hamburger menu
-  const [isMobileSearchVisible, setIsMobileSearchVisible] = useState(false); // State for mobile search bar visibility
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileSearchVisible, setIsMobileSearchVisible] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem('isLoggedIn');
+    if (loggedInUser) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -45,7 +52,7 @@ export default function Navbar() {
           to="/"
           className="text-2xl font-bold tracking-wide flex-grow text-center md:flex-grow-0 md:text-left"
         >
-          NEWS READER
+          REDFOX NEWS
         </Link>
 
         {/* Desktop Categories (Frame 2) */}
@@ -84,12 +91,27 @@ export default function Navbar() {
             </button>
           </form>
 
-          <button className="px-4 py-1 border border-white rounded hover:bg-white hover:text-red-700 transition">
-            Sign in
-          </button>
-          <button className="px-4 py-1 bg-white text-red-700 rounded hover:bg-gray-100 transition">
-            Register
-          </button>
+          {isLoggedIn ? (
+            <button
+              className="px-4 py-1 border border-white rounded hover:bg-white hover:text-red-700 transition"
+              onClick={() => {
+                localStorage.removeItem('isLoggedIn');
+                setIsLoggedIn(false);
+                navigate('/'); // Redirect to home
+              }}
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link to="/signin" className="px-4 py-1 border border-white rounded hover:bg-white hover:text-red-700 transition">
+                Sign in
+              </Link>
+              <Link to="/register" className="px-4 py-1 bg-white text-red-700 rounded hover:bg-gray-100 transition">
+                Register
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Search Icon (Frame 1) */}
@@ -142,20 +164,37 @@ export default function Navbar() {
               </Link>
             ))}
             {/* Add auth links to mobile drawer */}
-            <Link
-              to="/signin"
-              className="w-full text-left px-3 py-2 text-white hover:bg-red-700 rounded"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/register"
-              className="w-full text-left px-3 py-2 text-white hover:bg-red-700 rounded"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Register
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                to="/"
+                className="w-full text-left px-3 py-2 text-white hover:bg-red-700 rounded"
+                onClick={() => {
+                  localStorage.removeItem('isLoggedIn');
+                  setIsLoggedIn(false);
+                  setIsMobileMenuOpen(false);
+                  navigate('/');
+                }}
+              >
+                Logout
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/signin"
+                  className="w-full text-left px-3 py-2 text-white hover:bg-red-700 rounded"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/register"
+                  className="w-full text-left px-3 py-2 text-white hover:bg-red-700 rounded"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}

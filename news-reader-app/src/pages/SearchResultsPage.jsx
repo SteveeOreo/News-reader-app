@@ -1,48 +1,40 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { searchArticles } from "../services/newsAPI";
+import { useNewsStore } from "../store/newsStore";
 import NewsList from "../components/NewsList";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ErrorMessage from "../components/ErrorMessage";
 
 export default function SearchResultsPage() {
   const { query } = useParams();
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Use the store to get state and actions
+  const { articles, loading, error, searchArticles } = useNewsStore();
 
   useEffect(() => {
-    const getSearchResults = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await searchArticles(query);
-        setArticles(data);
-      } catch (err) {
-        console.error("Error fetching search results:", err);
-        setError("Failed to fetch search results. Please try again later.");
-        setArticles([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    // Fetch search results when the component mounts or the query changes
     if (query) {
-      getSearchResults();
-    } else {
-      setArticles([]);
-      setLoading(false);
+      searchArticles(query);
     }
-  }, [query]);
+  }, [query, searchArticles]);
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Search Results for "{query}"</h1>
-      {loading && <p>Loading search results...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {!loading && !error && articles.length === 0 && (
-        <p>No articles found for "{query}".</p>
-      )}
+    <div className="p-4 md:p-6">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6">Search Results for "{query}"</h1>
+      
+      {/* Loading state */}
+      {loading && <LoadingSpinner />}
+      
+      {/* Error state */}
+      {error && <ErrorMessage message={error} />}
+      
+      {/* Success state - articles found */}
       {!loading && !error && articles.length > 0 && (
         <NewsList articles={articles} />
+      )}
+      
+      {/* Success state - no articles found */}
+      {!loading && !error && articles.length === 0 && (
+        <p className="text-center text-gray-500">No articles found for "{query}".</p>
       )}
     </div>
   );

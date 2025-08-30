@@ -1,31 +1,41 @@
-// src/services/newsAPI.js
 import axios from "axios";
 
-const API_KEY = import.meta.env.VITE_NEWS_API_KEY; // put your API key in .env
-const BASE_URL = "https://newsapi.org/v2";
+const API_TOKEN = import.meta.env.VITE_NEWS_API_KEY;
+const BASE_URL = "https://api.thenewsapi.com/v1/news/all";
 
-// Fetch top headlines (optionally by category)
-export const fetchTopHeadlines = async (category = null) => {
-  const url = `${BASE_URL}/top-headlines`;
-  const params = {
-    country: "us",
-    apiKey: API_KEY,
-  };
-  if (category) params.category = category;
+export const fetchArticles = async (category = null) => {
+  try {
+    const params = {
+      api_token: API_TOKEN,
+      language: "en",
+      limit: 30, // --- ADDED: Request more articles ---
+    };
+    if (category) {
+      params.categories = category;
+    }
 
-  const response = await axios.get(url, { params });
-  return response.data.articles;
+    const response = await axios.get(BASE_URL, { params });
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching articles:", error);
+    return [];
+  }
 };
 
-// Search for articles
 export const searchArticles = async (query) => {
-  const url = `${BASE_URL}/everything`;
-  const params = {
-    q: query,
-    sortBy: "publishedAt",
-    apiKey: API_KEY,
-  };
+  try {
+    const params = {
+      api_token: API_TOKEN,
+      search: query,
+      language: "en",
+      sort: "relevance_score",
+      limit: 30, // --- ADDED: Request more articles ---
+    };
 
-  const response = await axios.get(url, { params });
-  return response.data.articles;
+    const response = await axios.get(BASE_URL, { params });
+    return response.data.data;
+  } catch (error) {
+    console.error("Error searching articles:", error);
+    return [];
+  }
 };
