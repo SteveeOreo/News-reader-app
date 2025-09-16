@@ -8,7 +8,7 @@ export const fetchArticles = async (category = null) => {
     const params = {
       api_token: API_TOKEN,
       language: "en",
-      limit: 30, // --- ADDED: Request more articles ---
+      limit: 30, // I increased this to get more articles per request
     };
     if (category) {
       params.categories = category;
@@ -29,7 +29,7 @@ export const searchArticles = async (query) => {
       search: query,
       language: "en",
       sort: "relevance_score",
-      limit: 30, // --- ADDED: Request more articles ---
+      limit: 30, // I want more search results to show users
     };
 
     const response = await axios.get(BASE_URL, { params });

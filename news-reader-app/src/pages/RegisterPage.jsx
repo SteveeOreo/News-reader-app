@@ -1,110 +1,384 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-    // Simple validation
-    if (!email || !password || !confirmPassword) {
+    // Check that all required fields are filled out
+    if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all fields.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setIsLoading(false);
       return;
     }
 
-    // In a real app, you'd make an API call to your backend for registration.
-    // For this example, we'll use local storage.
-    try {
-      const newUser = { email, password };
-      localStorage.setItem("user", JSON.stringify(newUser));
-      localStorage.setItem("isLoggedIn", "true");
-      setError("");
-      setSuccess(true);
-      navigate("/"); // Redirect to home page
-    } catch (error) {
-      setError("Registration failed. Please try again.");
-      console.error("Registration error:", error);
+    // Make sure the email format is valid
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      setIsLoading(false);
+      return;
     }
+
+    // Adding a small delay to simulate real registration
+    setTimeout(() => {
+      try {
+        // First check if someone already registered with this email
+        const existingUser = localStorage.getItem("user");
+        if (existingUser) {
+          const user = JSON.parse(existingUser);
+          if (user.email === email) {
+            setError(
+              "An account with this email already exists. Please sign in instead.",
+            );
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // For now I'm using localStorage for demo purposes
+        // TODO: Replace with proper API registration later
+        const newUser = { name, email, password };
+        localStorage.setItem("user", JSON.stringify(newUser));
+        localStorage.setItem("isLoggedIn", "true");
+        setError("");
+        navigate("/"); // Take them to the homepage after successful signup
+      } catch (error) {
+        setError("Registration failed. Please try again.");
+        console.error("Registration error:", error);
+      }
+      setIsLoading(false);
+    }, 1500);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-red-100">
-      <div className="px-8 py-6 mx-4 mt-4 text-left bg-white shadow-lg rounded-lg md:w-1/3">
-        <h3 className="text-2xl font-bold text-center">Register</h3>
-        {success && (
-          <p className="text-green-500 text-sm mt-2">
-            Registration successful! You are now signed in.
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        {/* Brand header and welcome message */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Join REDFOX NEWS
+          </h2>
+          <p className="text-gray-600">
+            Create your account to stay updated with the latest news
           </p>
-        )}
-        <form onSubmit={handleRegister}>
-          <div className="mt-4">
+        </div>
+
+        {/* Main registration form */}
+        <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-200">
+          <form onSubmit={handleRegister} className="space-y-6">
+            {/* Full name field */}
             <div>
               <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="email"
+                htmlFor="name"
+                className="block text-sm font-semibold text-gray-700 mb-2"
               >
-                Email
+                Full Name
               </label>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
+              <div className="relative">
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                  disabled={isLoading}
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
-            <div className="mt-4">
+
+            {/* Email field with validation */}
+            <div>
               <label
-                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="email"
+                className="block text-sm font-semibold text-gray-700 mb-2"
+              >
+                Email Address
+              </label>
+              <div className="relative">
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                  disabled={isLoading}
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Password field with strength requirements */}
+            <div>
+              <label
                 htmlFor="password"
+                className="block text-sm font-semibold text-gray-700 mb-2"
               >
                 Password
               </label>
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a strong password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    {showPassword ? (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+                      />
+                    ) : (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    )}
+                  </svg>
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Must be at least 6 characters long
+              </p>
             </div>
-            <div className="mt-4">
+
+            {/* Password confirmation field */}
+            <div>
               <label
-                className="block text-gray-700 text-sm font-bold mb-2"
                 htmlFor="confirmPassword"
+                className="block text-sm font-semibold text-gray-700 mb-2"
               >
                 Confirm Password
               </label>
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 text-gray-900 placeholder-gray-500"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                  disabled={isLoading}
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    {showConfirmPassword ? (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+                      />
+                    ) : (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
-            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-            <div className="mt-6">
-              <button
-                type="submit"
-                className="px-4 py-2 font-bold text-white bg-red-500 rounded hover:bg-red-700 focus:outline-none focus:shadow-outline"
-              >
-                Register
-              </button>
+
+            {/* Show any registration errors */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <svg
+                    className="h-5 w-5 text-red-500 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <p className="text-red-700 text-sm font-medium">{error}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Required terms agreement checkbox */}
+            <div className="flex items-start space-x-2">
+              <input
+                type="checkbox"
+                id="terms"
+                required
+                className="mt-1 h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                disabled={isLoading}
+              />
+              <label htmlFor="terms" className="text-sm text-gray-700">
+                I agree to the{" "}
+                <a
+                  href="#"
+                  className="text-red-700 hover:text-red-800 font-medium"
+                >
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a
+                  href="#"
+                  className="text-red-700 hover:text-red-800 font-medium"
+                >
+                  Privacy Policy
+                </a>
+              </label>
+            </div>
+
+            {/* Registration button with loading state */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-red-700 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-800 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Creating Account...
+                </div>
+              ) : (
+                "Create Account"
+              )}
+            </button>
+          </form>
+
+          {/* Separator line */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">
+                Already have an account?
+              </span>
             </div>
           </div>
-        </form>
+
+          {/* Link to login page for existing users */}
+          <Link
+            to="/signin"
+            className="w-full block text-center bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Sign In Instead
+          </Link>
+        </div>
+
+        {/* Welcome message for new users */}
+        <div className="text-center mt-8">
+          <p className="text-sm text-gray-600">
+            Join thousands of readers who trust REDFOX NEWS for accurate, timely
+            news coverage.
+          </p>
+        </div>
       </div>
     </div>
   );

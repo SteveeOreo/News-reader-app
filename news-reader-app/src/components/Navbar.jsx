@@ -18,7 +18,7 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('isLoggedIn');
+    const loggedInUser = localStorage.getItem("isLoggedIn");
     if (loggedInUser) {
       setIsLoggedIn(true);
     }
@@ -29,16 +29,16 @@ export default function Navbar() {
     if (searchQuery.trim()) {
       navigate(`/search/${searchQuery}`);
       setSearchQuery("");
-      // Hide mobile search bar after submitting if it was visible
+      // Close mobile search after they submit
       if (isMobileSearchVisible) setIsMobileSearchVisible(false);
     }
   };
 
   return (
     <header className="bg-red-700 text-white sticky top-0 z-50 shadow-md">
-      {/* Top bar for mobile and desktop */}
+      {/* Main navigation bar */}
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between relative">
-        {/* Mobile Hamburger Menu */}
+        {/* Hamburger menu for mobile */}
         <button
           className="md:hidden text-2xl p-2 -ml-2 focus:outline-none"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -47,7 +47,7 @@ export default function Navbar() {
           ☰
         </button>
 
-        {/* Logo */}
+        {/* My brand logo */}
         <Link
           to="/"
           className="text-2xl font-bold tracking-wide flex-grow text-center md:flex-grow-0 md:text-left"
@@ -55,7 +55,7 @@ export default function Navbar() {
           REDFOX NEWS
         </Link>
 
-        {/* Desktop Categories (Frame 2) */}
+        {/* Category navigation for desktop */}
         <nav className="hidden md:flex space-x-4 ml-8 items-center">
           {categories.map((cat) => (
             <Link
@@ -68,9 +68,9 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Desktop Search Input & Auth Buttons (Frame 2) */}
+        {/* Search and login buttons for desktop */}
         <div className="hidden md:flex items-center space-x-4 ml-auto">
-          {/* Desktop Search Bar */}
+          {/* Search functionality */}
           <form
             onSubmit={handleSearchSubmit}
             className="flex items-center bg-white rounded-full overflow-hidden"
@@ -95,26 +95,32 @@ export default function Navbar() {
             <button
               className="px-4 py-1 border border-white rounded hover:bg-white hover:text-red-700 transition"
               onClick={() => {
-                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem("isLoggedIn");
                 setIsLoggedIn(false);
-                navigate('/'); // Redirect to home
+                navigate("/"); // Take them back to homepage
               }}
             >
               Logout
             </button>
           ) : (
             <>
-              <Link to="/signin" className="px-4 py-1 border border-white rounded hover:bg-white hover:text-red-700 transition">
+              <Link
+                to="/signin"
+                className="px-4 py-1 border border-white rounded hover:bg-white hover:text-red-700 transition"
+              >
                 Sign in
               </Link>
-              <Link to="/register" className="px-4 py-1 bg-white text-red-700 rounded hover:bg-gray-100 transition">
+              <Link
+                to="/register"
+                className="px-4 py-1 bg-white text-red-700 rounded hover:bg-gray-100 transition"
+              >
                 Register
               </Link>
             </>
           )}
         </div>
 
-        {/* Mobile Search Icon (Frame 1) */}
+        {/* Search icon for mobile */}
         <button
           className="md:hidden text-2xl p-2 -mr-2 focus:outline-none"
           onClick={() => setIsMobileSearchVisible(!isMobileSearchVisible)}
@@ -124,7 +130,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Search Bar (Frame 1 - hidden by default, toggled) */}
+      {/* Mobile search form - shows when search icon is tapped */}
       {isMobileSearchVisible && (
         <div className="md:hidden px-4 pb-2">
           <form
@@ -149,7 +155,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Mobile Nav Drawer (for hamburger menu) */}
+      {/* Mobile navigation menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-red-800 py-2 shadow-lg z-40">
           <nav className="flex flex-col items-start px-4 space-y-2">
@@ -163,16 +169,16 @@ export default function Navbar() {
                 {cat}
               </Link>
             ))}
-            {/* Add auth links to mobile drawer */}
+            {/* Login/logout options for mobile */}
             {isLoggedIn ? (
               <Link
                 to="/"
                 className="w-full text-left px-3 py-2 text-white hover:bg-red-700 rounded"
                 onClick={() => {
-                  localStorage.removeItem('isLoggedIn');
+                  localStorage.removeItem("isLoggedIn");
                   setIsLoggedIn(false);
                   setIsMobileMenuOpen(false);
-                  navigate('/');
+                  navigate("/");
                 }}
               >
                 Logout
